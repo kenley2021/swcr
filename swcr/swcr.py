@@ -140,10 +140,6 @@ class CodeWriter(object):
         """
         return not bool(line)
 
-    def write_page_number(self):
-        # todo: 实现写入页码
-        return self
-
     def is_comment_line(self, line):
         line = line.lstrip()  # 去除左侧缩进
         is_comment = False
@@ -279,7 +275,6 @@ def main(
         line_spacing=line_spacing
     )
     writer.write_header(title)
-    writer.write_page_number()
     for file in files:
         writer.write_file(file)
     writer.save(outfile)
