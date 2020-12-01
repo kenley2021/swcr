@@ -14,7 +14,7 @@
         * [生成文档](#生成文档)
      * [常见问题](#常见问题)
         * [如何指定页眉？](#如何指定页眉？)
-        * [如何添加html、css、js代码？](#如何添加html、css、js代码？)
+        * [如何添加其他格式的代码？](#如何添加其他格式的代码？)
         * [如何排除指定文件或文件夹？](#如何排除指定文件或文件夹？)
         * [如何调整默认的注释风格？](#如何调整默认的注释风格？)
         * [如何调整字体？](#如何调整字体？)
@@ -107,7 +107,7 @@ swcr -i django-guardian -o django-guardian.docx
 swcr -i django-guardian -t django-guardian -o django-guardian.docx
 ```
 
-#### 如何添加html、css、js代码？
+#### 如何添加其他格式的代码？
 
 上述方法只能识别Python源码，如果需要识别html、css、js代码，可以指定`-e`参数。
 
