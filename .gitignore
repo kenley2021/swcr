@@ -4,3 +4,4 @@ dist
 build
 *.pyc
 swcr.egg-info
+swcr.spec
