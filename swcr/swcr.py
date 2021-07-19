@@ -164,7 +164,7 @@ class CodeWriter(object):
         """
         把单个文件添加到程序文档里面
         """
-        with open(file) as fp:
+        with open(file, encoding='utf-8') as fp:
             for line in fp:
                 line = line.rstrip()
                 if self.is_blank_line(line):
