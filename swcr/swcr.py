@@ -19,10 +19,10 @@ logger = logging.getLogger(__name__)
 # 默认源代码文件目录
 DEFAULT_INDIRS = ['.']
 # 默认支持的代码格式
-DEFAULT_EXTS = ['py']
+DEFAULT_EXTS = ['c', 'h']
 # 默认的注释前缀
 DEFAULT_COMMENT_CHARS = (
-    '#', '//'
+    '/*', '//'
 )
 
 
@@ -53,9 +53,9 @@ class CodeFinder(object):
     def __init__(self, exts=None):
         """
         Args:
-            exts: 后缀名，默认为以py结尾
+            exts: 后缀名，默认为以DEFAULT_EXTS内后缀结尾
         """
-        self.exts = exts if exts else ['py']
+        self.exts = exts if exts else DEFAULT_EXTS
 
     def is_code(self, file):
         for ext in self.exts:
@@ -112,7 +112,7 @@ class CodeFinder(object):
                 continue
             for file in self.find(entry_path, excludes=excludes):
                 files.append(file)
-        logger.debug('在%s目录下找到%d个代码文件.', indir, len(files))
+        logger.debug('%s directory:%d code files.', indir, len(files))
         return files
 
 
@@ -164,7 +164,7 @@ class CodeWriter(object):
         """
         把单个文件添加到程序文档里面
         """
-        with open(file) as fp:
+        with open(file, encoding='utf-8') as fp:
             for line in fp:
                 line = line.rstrip()
                 if self.is_blank_line(line):
