@@ -2,157 +2,75 @@
 import logging
 import pkg_resources
 from os.path import abspath
-try:
-    from os import scandir
-except ImportError:
-    from scandir import scandir
+from os import scandir
+from pathlib import Path
 
 import click
 from docx import Document
 from docx.shared import Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
-
 logger = logging.getLogger(__name__)
 
-
-# 默认源代码文件目录
 DEFAULT_INDIRS = ['.']
-# 默认支持的代码格式
 DEFAULT_EXTS = ['c', 'h']
-# 默认的注释前缀
-DEFAULT_COMMENT_CHARS = (
-    '/*', '//'
-)
-
+DEFAULT_COMMENT_CHARS = ['/*', '*', '*/', '//']
 
 def del_slash(dirs):
-    """
-    删除文件夹最后一位的/
-
-    Args:
-        dirs: 文件夹列表
-    Returns:
-        删除之后的文件夹
-    """
-    no_slash_dirs = []
-    for dir_ in dirs:
-        if dir_[-1] == '/':
-            no_slash_dirs.append(dir_[: -1])
-        else:
-            no_slash_dirs.append(dir_)
-    return no_slash_dirs
-
+    return [dir_[:-1] if dir_[-1] == '/' else dir_ for dir_ in dirs]
 
 class CodeFinder(object):
-    """
-    给定一个目录，和若干个后缀名，
-    递归地遍历该目录，找到该目录下
-    所有以这些后缀结束的文件
-    """
     def __init__(self, exts=None):
-        """
-        Args:
-            exts: 后缀名，默认为以DEFAULT_EXTS内后缀结尾
-        """
         self.exts = exts if exts else DEFAULT_EXTS
 
     def is_code(self, file):
-        for ext in self.exts:
-            if file.endswith(ext):
-                return True
-        return False
+        return any(file.endswith(ext) for ext in self.exts)
 
     @staticmethod
     def is_hidden_file(file):
-        """
-        是否是隐藏文件
-        """
         return file[0] == '.'
 
     @staticmethod
     def should_be_excluded(file, excludes=None):
-        """
-        是否需要略过此文件
-        """
         if not excludes:
             return False
         if not isinstance(excludes, list):
             excludes = [excludes]
-        should_be_excluded = False
-        for exclude in excludes:
-            if file.startswith(exclude):
-                should_be_excluded = True
-                break
-        return should_be_excluded
+        return any(file.startswith(exclude) for exclude in excludes)
 
     def find(self, indir, excludes=None):
-        """
-        给定一个文件夹查找这个文件夹下所有的代码
-
-        Args:
-            indir: 需要查到代码的目录
-            excludes: 排除文件或目录
-        Returns:
-            代码文件列表
-        """
         files = []
         for entry in scandir(indir):
-            # 防止根目录有一些含有非常多文件的隐藏文件夹
-            # 例如，.git文件，如果不排除，此程序很难运行
             entry_name = entry.name
             entry_path = abspath(entry.path)
-            if self.is_hidden_file(entry_name):
-                continue
-            if self.should_be_excluded(entry_path, excludes):
+            if self.is_hidden_file(entry_name) or self.should_be_excluded(entry_path, excludes):
                 continue
             if entry.is_file():
                 if self.is_code(entry_name):
                     files.append(entry_path)
-                continue
-            for file in self.find(entry_path, excludes=excludes):
-                files.append(file)
+            else:
+                files.extend(self.find(entry_path, excludes=excludes))
         logger.debug('%s directory:%d code files.', indir, len(files))
         return files
 
-
 class CodeWriter(object):
-    def __init__(
-            self, font_name='宋体',
-            font_size=10.5, space_before=0.0,
-            space_after=2.3, line_spacing=10.5,
-            command_chars=None, document=None
-    ):
+    def __init__(self, font_name='宋体', font_size=10.5, space_before=0.0, space_after=2.3, line_spacing=10.5, command_chars=None, document=None):
         self.font_name = font_name
         self.font_size = font_size
         self.space_before = space_before
         self.space_after = space_after
         self.line_spacing = line_spacing
-        self.command_chars = command_chars if command_chars else DEFAULT_COMMENT_CHARS
-        self.document = Document(pkg_resources.resource_filename(
-            'swcr', 'template.docx'
-        )) if not document else document
+        self.command_chars = command_chars if not command_chars else DEFAULT_COMMENT_CHARS
+        self.document = Document(pkg_resources.resource_filename('swcr', 'template.docx')) if not document else document
 
     @staticmethod
     def is_blank_line(line):
-        """
-        判断是否是空行
-        """
-        return not bool(line)
+        return not bool(line.strip())
 
     def is_comment_line(self, line):
-        line = line.lstrip()  # 去除左侧缩进
-        is_comment = False
-        for comment_char in self.command_chars:
-            if line.startswith(comment_char):
-                is_comment = True
-                break
-        return is_comment
+        return any(line.lstrip().startswith(comment_char) for comment_char in self.command_chars)
 
     def write_header(self, title):
-        """
-        写入页眉
-        """
         paragraph = self.document.sections[0].header.paragraphs[0]
         paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
         run = paragraph.add_run(title)
@@ -160,16 +78,21 @@ class CodeWriter(object):
         run.font.size = Pt(self.font_size)
         return self
 
+    def check_file_encoding(self, file_path):
+        """ check file encoding """
+        import chardet
+        with open(file_path, 'rb') as fd:
+            encode_str = chardet.detect(fd.read())['encoding']
+            logging.info("input_file: {0}, encoding: {1}".format(file_path, encode_str))
+            return encode_str
+
     def write_file(self, file):
-        """
-        把单个文件添加到程序文档里面
-        """
-        with open(file, encoding='utf-8') as fp:
+        with open(file, encoding=self.check_file_encoding(file)) as fp:
             for line in fp:
                 line = line.rstrip()
-                if self.is_blank_line(line):
-                    continue
-                if self.is_comment_line(line):
+                blank_line = self.is_blank_line(line)
+                comment_line = self.is_comment_line(line)
+                if blank_line or comment_line:
                     continue
                 paragraph = self.document.add_paragraph()
                 paragraph.paragraph_format.space_before = Pt(self.space_before)
@@ -182,7 +105,6 @@ class CodeWriter(object):
 
     def save(self, file):
         self.document.save(file)
-
 
 @click.command(name='swcr')
 @click.option(
@@ -279,7 +201,6 @@ def main(
         writer.write_file(file)
     writer.save(outfile)
     return 0
-
 
 if __name__ == '__main__':
     main()
