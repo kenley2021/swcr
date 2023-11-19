@@ -12,12 +12,6 @@ python-docx-0.8.11.tar.gz
 // 安装
 pip install python-docx-0.8.11.tar.gz
 // 执行命令，user为目录下的代码文件目录
-python swcr.py -i user -t DAB蓝牙收音机音箱软件V1.0 -e 'c' -e 'h' -c '/* * */ //' --font-name 宋体 --font-size 10.5 --space-before 0 --space-after 2.3 --line-spacing 10.5 --exclude user/output -o DAB蓝牙收音机音箱软件V1.0.docx -v
-
-python swcr.py -i user -t DAB蓝牙收音机音箱软件V1.0 -e 'c' -e 'h' --font-name 宋体 --font-size 10.5 --space-before 0 --space-after 2.3 --line-spacing 10.5 --exclude user/output -o DAB蓝牙收音机音箱软件V1.0.docx -v
-
-swcr.exe -i user -t DAB蓝牙收音机音箱软件V1.0 -e 'c' -e 'h' -c '/* * */ //' --font-name 宋体 --font-size 10.5 --space-before 0 --space-after 2.3 --line-spacing 10.5 --exclude user/output -o DAB蓝牙收音机音箱软件V1.0.docx -v
-
-swcr.exe -i user -t DAB蓝牙收音机音箱软件V1.0 -e 'c' -e 'h' --font-name 宋体 --font-size 10.5 --space-before 0 --space-after 2.3 --line-spacing 10.5 --exclude user/output -o DAB蓝牙收音机音箱软件V1.0.docx -v
+python swcr.py --title 'DAB蓝牙收音机音箱软件V1.0' --indirs 'user' --exts 'h' 'c' --comment_chars '//' '/*' '*' '*/' --font_name '宋体' --font_size 10.5 --space_before 0.0 --space_after 2.3 --line_spacing 10.5 --outfile 'DAB蓝牙收音机音箱软件V1.0.docx'
 // 打包程序为exe
 pyinstaller -i apple.ico -n swcr -F swcr.py --noconsole
