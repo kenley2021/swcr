@@ -1,0 +1,28 @@
+
+// 安装click
+pip install click
+
+// 安装docx
+pip install docx
+
+//在线安装
+pip install python-docx
+
+//离线安装
+// 下载安装包
+https://pypi.org/project/python-docx/#files
+python-docx-0.8.11.tar.gz
+
+// 安装
+pip install python-docx-0.8.11.tar.gz
+
+// 执行命令，user为目录下的代码文件目录
+python swcr.py --title 'DAB蓝牙收音机音箱软件V1.0' --indirs 'user' --exts 'h' 'c' --comment_chars '//' '/*' '*' '*/' --font_name '宋体' --font_size 10.5 --space_before 0.0 --space_after 2.3 --line_spacing 10.5 --outfile 'DAB蓝牙收音机音箱软件V1.0.docx'
+
+python swcr.py --title '固件合并软件V1.0' --indirs 'src' --exts 'h' 'c' --comment_chars '//' '/*' '/**' '*' '*/' --font_name '宋体' --font_size 10.5 --space_before 0.0 --space_after 2.3 --line_spacing 10.5 --outfile '固件合并软件V1.0.docx'
+python swcr.py --title '固件合并软件V1.6.3' --indirs 'src' --exts 'h' 'c' --comment_chars '//' '/*' '/**' '*' '*/' --font_name '宋体' --font_size 10.5 --space_before 0.0 --space_after 2.3 --line_spacing 10.5 --outfile '固件合并软件V1.6.3.docx'
+
+python swcr.py --title '软著生成软件V1.0' --indirs 'swcr' --exts 'py' --comment_chars '#' --font_name '宋体' --font_size 10.5 --space_before 0.0 --space_after 2.3 --line_spacing 10.5 --outfile '软著生成软件V1.0.docx'
+
+// 打包程序为exe
+pyinstaller -i apple.ico -n swcr -F swcr.py --noconsole
